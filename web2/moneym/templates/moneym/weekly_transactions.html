@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weekly Transactions</title>
+</head>
+<body>
+    <h2>Weekly Transactions</h2>
+    {% for day_data in transactions_by_day %}
+        <h3>{{ day_data.date }}</h3>
+        <table>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Account Type</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Note</th>
+            </tr>
+            {% for transaction in day_data.transactions %}
+                <tr>
+                    <td>{{ transaction.transactionId }}</td>
+                    <td>{{ transaction.accountId.type}}</td>
+                    <td>{{ transaction.Subcategory }}</td>
+                    <td>{{ transaction.amount }}</td>
+                    <td>{{ transaction.note }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p>Daily Total: {{ day_data.daily_total }}</p>
+        <hr>
+    {% endfor %}
+
+    
+</body>
+</html>
