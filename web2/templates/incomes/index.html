@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 
 
 {% block content %}
@@ -8,28 +10,28 @@
       <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a href="">Expenses</a>
+            <a href="">Income</a>
           </li>
           <li class="breadcrumb-item active" aria-current="page">
-            My Expenses
+            My Income
           </li>
         </ol>
       </nav>
     </div>
 
     <div class="col-md-2">
-      <a href="{% url 'add-expense'%}" class="btn btn-primary">Add Expense</a>
+      <a href="{% url 'add-incomes'%}" class="btn btn-primary">Add Income</a>
     </div>
   </div>
 
   <div class="container">
-    {% if expenses.count %}
+    {% if incomes.count %}
 
     <table class="table table-stripped table-hover">
       <thead>
         <tr>
           <th>Amount ({{currency}})</th>
-          <th>Category</th>
+          <th>Source</th>
           <th>Description</th>
           <th>Date</th>
           <th></th>
@@ -37,16 +39,16 @@
       </thead>
 
       <tbody>
-        {% for expense in expenses%}
+        {% for income in incomes%}
         <tr>
-          <td>{{expense.amount}}</td>
-          <td>{{expense.category}}</td>
-          <td>{{expense.description}}</td>
-          <td>{{expense.date}}</td>
+          <td>{{income.amount}}</td>
+          <td>{{income.source}}</td>
+          <td>{{income.description}}</td>
+          <td>{{income.date}}</td>
 
           <td>
             <a
-              href="{% url 'edit-expense' expense.id  %}"
+              href="{% url 'edit-income' income.id  %}"
               class="btn btn-secondary btn-sm"
               >Edit</a
             >
