@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
+from accounts.models import *
 
 # Create your models here.
 class Source(models.Model):
@@ -10,11 +11,12 @@ class Source(models.Model):
         return self.name
 
 class Income(models.Model):
-    amount = models.IntegerField(null=False, default=0)  # DECIMAL
+    account = models.ForeignKey(Account, on_delete=models.CASCADE, default=1)
+    amount = models.FloatField()  
     date = models.DateField(default=now)
     description = models.TextField()
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE)
-    source = models.CharField(max_length=266)
+    source = models.ForeignKey(Source, on_delete=models.CASCADE, default=1)
+    
 
 
     def __str__(self):
@@ -22,6 +24,5 @@ class Income(models.Model):
 
     class Meta:
         ordering: ['-date']
-
 
 

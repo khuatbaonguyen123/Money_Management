@@ -1,0 +1,13 @@
+{% extends 'base.html' %} {% block content %}
+
+<div class="container mt-4">
+  <h1>Delete Expense</h1>
+  <p>Are you sure you want to delete the expense "{{ expense }}"?</p>
+  <form action="{% url 'expense-delete' id=expense.id %}" method="post">
+    {% csrf_token %}
+    <button type="submit">Yes, delete it</button>
+    <a href="{% url 'expenses' %}">Cancel</a>
+  </form>
+</div>
+
+{% endblock %}

@@ -47,16 +47,10 @@
           />
         </div>
         <div class="form-group">
-          <label for="">Category</label>
-          <select class="form-control" name="category">
-            <option selected name="category" value="{{values.category}}"
-              >{{values.category}}</option
-            >
-            {% for category in categories%}
-            <option name="category" value="{{category.name}}"
-              >{{category.name}}</option
-            >
-
+          <label for="id_category">Category</label>
+          <select class="form-control" name="category" id="id_category">
+            {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.name }}</option>
             {% endfor %}
           </select>
         </div>
@@ -69,7 +63,14 @@
             name="expense_date"
           />
         </div>
-
+        <div class="form-group">
+          <label for="id_account">Account</label>
+          <select class="form-control" name="account" id="id_account">
+            {% for account in form.fields.account.queryset %}
+            <option value="{{ account.id }}">{{ account.accountName }}</option>
+            {% endfor %}
+          </select>
+        </div>
         <input
           type="submit"
           value="Save"

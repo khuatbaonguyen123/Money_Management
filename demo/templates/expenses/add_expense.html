@@ -15,7 +15,7 @@
       <form action="{% url 'add-expenses' %}" method="post">
         {% include 'partials/_messages.html'%} {% csrf_token %}
         <div class="form-group">
-          <label for="">Amount</label>
+          <label for="id_amount">Amount</label>
           <input
             type="text"
             class="form-control form-control-sm"
@@ -24,7 +24,7 @@
           />
         </div>
         <div class="form-group">
-          <label for="">Description</label>
+          <label for="id_description">Description</label>
           <input
             type="text"
             class="form-control form-control-sm"
@@ -33,28 +33,35 @@
           />
         </div>
         <div class="form-group">
-          <label for="">Category</label>
-          <select class="form-control" name="category">
-            {% for category in categories%}
-            <option name="category" value="{{category.name}}"
-              >{{category.name}}</option
-            >
-
+          <label for="id_category">Category</label>
+          <select class="form-control" name="category" id="id_category">
+            {% for category in categories %}
+              <option value="{{ category.id }}">{{ category.name }}</option>
             {% endfor %}
           </select>
         </div>
         <div class="form-group">
-          <label for="">Date of Expense</label>
+          <label for="id_date">Date of Expense</label>
           <input
             type="date"
             class="form-control form-control-sm"
-            name="expense_date"
+            name="date"
+            id="id_date"
           />
+        </div>
+
+        <div class="form-group">
+          <label for="id_account">Account</label>
+          <select class="form-control" name="account" id="id_account">
+            {% for account in form.fields.account.queryset %}
+            <option value="{{ account.id }}">{{ account.accountName }}</option>
+            {% endfor %}
+          </select>
         </div>
 
         <input
           type="submit"
-          value="Submit"
+          value="Add Expense"
           class="btn btn-primary btn-primary-sm"
         />
       </form>

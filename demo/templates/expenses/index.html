@@ -41,11 +41,13 @@
   <table class="table table-stripped table-hover">
     <thead>
       <tr>
-        <th>Amount ({{currency}})</th>
+        <th>Amount</th>
         <th>Category</th>
         <th>Description</th>
         <th>Date</th>
-        <th></th>
+        <th>Account</th>
+        <th>Edit</th>
+        <th>Delete</th>
       </tr>
     </thead>
 
@@ -53,16 +55,17 @@
       {% for expense in page_obj%}
       <tr>
         <td>{{expense.amount}}</td>
-        <td>{{expense.category}}</td>
+        <td>{{expense.category.name}}</td>
         <td>{{expense.description}}</td>
         <td>{{expense.date}}</td>
-
+        <td>{{expense.account.accountName}}</td>
         <td>
           <a
-            href="{% url 'expense-edit' expense.id  %}"
-            class="btn btn-secondary btn-sm"
-            >Edit</a
-          >
+            href="{% url 'expense-edit' expense.id  %}" class="btn btn-secondary btn-sm">Edit</a>
+        </td>
+        <td>
+          <a
+            href="{% url 'expense-delete' expense.id %}" class="btn btn-secondary btn-sm">Delete</a>
         </td>
       </tr>
 
@@ -78,11 +81,11 @@
       <table class="table table-stripped table-hover">
         <thead>
           <tr>
-            <th>Amount ({{currency}})</th>
+            <th>Amount</th>
             <th>Category</th>
             <th>Description</th>
             <th>Date</th>
-            <th></th>
+            <th>Account</th>
           </tr>
         </thead>
 
