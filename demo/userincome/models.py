@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from accounts.models import Account
 from django.utils.timezone import now
 
 # Create your models here.
@@ -13,9 +13,8 @@ class Income(models.Model):
     amount = models.IntegerField(null=False, default=0)  # DECIMAL
     date = models.DateField(default=now)
     description = models.TextField()
-    owner = models.ForeignKey(to=User, on_delete=models.CASCADE)
+    account = models.ForeignKey(Account, on_delete=models.CASCADE,default=1)
     source = models.CharField(max_length=266)
-
 
     def __str__(self):
         return self.source

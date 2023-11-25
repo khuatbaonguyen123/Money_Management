@@ -7,6 +7,7 @@ import json
 from django.http import JsonResponse
 # Create your views here.
 import datetime
+from .models import Account
 
 
 def search_income(request):
@@ -23,11 +24,14 @@ def search_income(request):
 
 @login_required(login_url='/authentication/login')
 def index(request):
-    categories = Source.objects.all()
-    income = Income.objects.filter(owner=request.user)
+    accounts = Account.objects.filter(userId=request.user)
+
+    income = Income.objects.filter(account__in=accounts)  
+
     paginator = Paginator(income, 5)
     page_number = request.GET.get('page')
     page_obj = Paginator.get_page(paginator, page_number)
+
     context = {
         'income': income,
         'page_obj': page_obj,
@@ -38,8 +42,10 @@ def index(request):
 @login_required(login_url='/authentication/login')
 def add_income(request):
     sources = Source.objects.all()
+    accounts = Account.objects.filter(userId=request.user)
     context = {
         'sources': sources,
+        'accounts' : accounts,
         'values': request.POST
     }
     if request.method == 'GET':
@@ -54,13 +60,20 @@ def add_income(request):
         description = request.POST['description']
         date = request.POST['income_date']
         source = request.POST['source']
+        account_id = request.POST['account']
 
         if not description:
             messages.error(request, 'description is required')
             return render(request, 'income/add_income.html', context)
 
-        Income.objects.create(owner=request.user, amount=amount, date=date,
+        income = Income.objects.create(owner=request.user, amount=amount, date=date,
                                   source=source, description=description)
+        
+        # Update the balance of the associated account
+        account = Account.objects.get(pk=account_id)
+        account.balance += income.amount
+        account.save()
+
         messages.success(request, 'Record saved successfully')
 
         return redirect('income')
