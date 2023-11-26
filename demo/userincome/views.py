@@ -123,9 +123,16 @@ def delete_income(request, id):
 def income_source_summary(request):
     todays_date = datetime.date.today()
     six_months_ago = todays_date-datetime.timedelta(days=30*6)
-    incomes = Income.objects.filter(owner=request.user,
-                                      date__gte=six_months_ago, date__lte=todays_date)
+    userAccount = Account.objects.filter(userId=request.user)
+    
     finalrep = {}
+
+    incomes = {}
+
+    for account in userAccount:
+        incomes = Income.objects.filter(
+            account=account, date__gte=six_months_ago, date__lte=todays_date
+        )
 
     def get_source(income):
         return income.source
