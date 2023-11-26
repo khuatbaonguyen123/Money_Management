@@ -66,13 +66,13 @@ def add_income(request):
             messages.error(request, 'description is required')
             return render(request, 'income/add_income.html', context)
 
-        income = Income.objects.create(owner=request.user, amount=amount, date=date,
+        account_instance = Account.objects.get(pk=account_id)
+        income = Income.objects.create(account=account_instance, amount=amount, date=date,
                                   source=source, description=description)
         
         # Update the balance of the associated account
-        account = Account.objects.get(pk=account_id)
-        account.balance += income.amount
-        account.save()
+        account_instance.balance += int(income.amount)
+        account_instance.save()
 
         messages.success(request, 'Record saved successfully')
 
