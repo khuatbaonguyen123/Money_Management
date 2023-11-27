@@ -8,6 +8,7 @@ from django.core.paginator import Paginator
 import json
 from django.http import JsonResponse
 import datetime
+from .models import Account
 
 
 def search_expenses(request):
@@ -24,11 +25,14 @@ def search_expenses(request):
 
 @login_required(login_url='/authentication/login')
 def index(request):
-    categories = Category.objects.all()
-    expenses = Expense.objects.filter(owner=request.user)
+    accounts = Account.objects.filter(userId=request.user)
+    
+    expenses = Expense.objects.filter(account__in=accounts)
+
     paginator = Paginator(expenses, 5)
     page_number = request.GET.get('page')
     page_obj = Paginator.get_page(paginator, page_number)
+
     context = {
         'expenses': expenses,
         'page_obj': page_obj,
@@ -39,8 +43,10 @@ def index(request):
 @login_required(login_url='/authentication/login')
 def add_expense(request):
     categories = Category.objects.all()
+    accounts = Account.objects.filter(userId=request.user)
     context = {
         'categories': categories,
+        'accounts' : accounts,
         'values': request.POST
     }
     if request.method == 'GET':
@@ -55,14 +61,20 @@ def add_expense(request):
         description = request.POST['description']
         date = request.POST['expense_date']
         category = request.POST['category']
+        account_id = request.POST['account']
 
         if not description:
             messages.error(request, 'description is required')
             return render(request, 'expenses/add_expense.html', context)
 
-        Expense.objects.create(owner=request.user, amount=amount, date=date,
+        account_instance = Account.objects.get(pk=account_id)
+        expense = Expense.objects.create(account=account_instance, amount=amount, date=date,
                                category=category, description=description)
         messages.success(request, 'Expense saved successfully')
+        account_instance.balance -= int(expense.amount)
+        account_instance.save()
+
+        messages.success(request, 'Record saved successfully')
 
         return redirect('expenses')
 
