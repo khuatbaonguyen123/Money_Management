@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from .models import Account
 from django.core.paginator import Paginator
 from django.contrib import messages
@@ -59,3 +60,16 @@ def account_edit(request, id):
         messages.success(request, 'Record updated  successfully')
 
         return redirect('account')
+    
+def stats_view(request) :
+    return render(request, 'account/statistic.html')
+
+def account_amount(request) :
+    accounts = Account.objects.filter(userId=request.user)
+    
+    finalrep = {}
+
+    for x in accounts:
+        finalrep[x.id] = x.balance
+
+    return JsonResponse({'account_data': finalrep}, safe=False)
