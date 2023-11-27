@@ -44,6 +44,7 @@
     <thead>
       <tr>
         <th>Amount ({{currency}})</th>
+        <th>Account</th>
         <th>Source</th>
         <th>Description</th>
         <th>Date</th>
@@ -55,6 +56,7 @@
       {% for income in page_obj%}
       <tr>
         <td>{{income.amount}}</td>
+        <td>{{income.account.account_name}}</td>
         <td>{{income.source}}</td>
         <td>{{income.description}}</td>
         <td>{{income.date}}</td>

@@ -13,11 +13,12 @@ from .models import Account
 def search_income(request):
     if request.method == 'POST':
         search_str = json.loads(request.body).get('searchText')
+        user_accounts = Account.objects.filter(user=request.user)
         income = Income.objects.filter(
-            amount__istartswith=search_str, owner=request.user) | Income.objects.filter(
-            date__istartswith=search_str, owner=request.user) | Income.objects.filter(
-            description__icontains=search_str, owner=request.user) | Income.objects.filter(
-            source__icontains=search_str, owner=request.user)
+            amount__istartswith=search_str, account__in=user_accounts) | Income.objects.filter(
+            date__istartswith=search_str, account__in=user_accounts) | Income.objects.filter(
+            description__icontains=search_str, account__in=user_accounts) | Income.objects.filter(
+            source__icontains=search_str, account__in=user_accounts)
         data = income.values()
         return JsonResponse(list(data), safe=False)
 
@@ -82,10 +83,12 @@ def add_income(request):
 @login_required(login_url='/authentication/login')
 def income_edit(request, id):
     income =Income.objects.get(pk=id)
+    accounts = Account.objects.filter(userId=request.user)
     sources = Source.objects.all()
     context = {
         'income': income,
         'values': income,
+        'accounts': accounts,
         'sources': sources
     }
     if request.method == 'GET':
@@ -99,14 +102,17 @@ def income_edit(request, id):
         description = request.POST['description']
         date = request.POST['income_date']
         source = request.POST['source']
+        account_id = request.POST['account']
 
         if not description:
             messages.error(request, 'description is required')
             return render(request, 'income/edit_income.html', context)
+        account_instance = Account.objects.get(pk=account_id)
         income.amount = amount
         income. date = date
         income.source = source
         income.description = description
+        income.account = account_instance
 
         income.save()
         messages.success(request, 'Record updated  successfully')
@@ -123,16 +129,11 @@ def delete_income(request, id):
 def income_source_summary(request):
     todays_date = datetime.date.today()
     six_months_ago = todays_date-datetime.timedelta(days=30*6)
-    userAccount = Account.objects.filter(userId=request.user)
+    accounts = Account.objects.filter(userId=request.user)
     
     finalrep = {}
 
-    incomes = {}
-
-    for account in userAccount:
-        incomes = Income.objects.filter(
-            account=account, date__gte=six_months_ago, date__lte=todays_date
-        )
+    incomes = Income.objects.filter(account__in=accounts, date__gte=six_months_ago, date__lte=todays_date)
 
     def get_source(income):
         return income.source
