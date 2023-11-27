@@ -70,11 +70,10 @@ def add_expense(request):
         account_instance = Account.objects.get(pk=account_id)
         expense = Expense.objects.create(account=account_instance, amount=amount, date=date,
                                category=category, description=description)
-        messages.success(request, 'Expense saved successfully')
         account_instance.balance -= int(expense.amount)
         account_instance.save()
 
-        messages.success(request, 'Record saved successfully')
+        messages.success(request, 'Expense saved successfully')
 
         return redirect('expenses')
 
@@ -126,7 +125,8 @@ def delete_expense(request, id):
 def expense_category_summary(request):
     todays_date = datetime.date.today()
     six_months_ago = todays_date-datetime.timedelta(days=30*6)
-    expenses = Expense.objects.filter(owner=request.user,
+    accounts = Account.objects.filter(userId=request.user)
+    expenses = Expense.objects.filter(account__in=accounts,
                                       date__gte=six_months_ago, date__lte=todays_date)
     finalrep = {}
 

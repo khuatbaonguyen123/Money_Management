@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'expenses',
     'userincome',
     'accounts',
+    'transfer'
 ]
 
 MIDDLEWARE = [
