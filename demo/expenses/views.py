@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Category, Expense
+from django.db.models import Sum
 # Create your views here.
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -13,14 +14,22 @@ from .models import Account
 
 def search_expenses(request):
     if request.method == 'POST':
-        search_str = json.loads(request.body).get('searchText')
-        expenses = Expense.objects.filter(
-            amount__istartswith=search_str, owner=request.user) | Expense.objects.filter(
-            date__istartswith=search_str, owner=request.user) | Expense.objects.filter(
-            description__icontains=search_str, owner=request.user) | Expense.objects.filter(
-            category__icontains=search_str, owner=request.user)
-        data = expenses.values()
-        return JsonResponse(list(data), safe=False)
+        try:
+            search_str = json.loads(request.body).get('searchText')
+            user_accounts = Account.objects.filter(user=request.user)
+            expenses = Expense.objects.filter(
+            amount__istartswith=search_str, account__in=user_accounts) | Expense.objects.filter(
+            date__istartswith=search_str, account__in=user_accounts) | Expense.objects.filter(
+            description__icontains=search_str, account__in=user_accounts) | Expense.objects.filter(
+            category__name__icontains=search_str, account__in=user_accounts)
+            # Note: Adjust the filtering conditions based on your model fields.
+            data = list(expenses.values('amount', 'account__account_name', 'category__name', 'description', 'date'))
+            return JsonResponse(data, safe=False)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'error': 'Invalid JSON data'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method'}, status=400)
 
 
 @login_required(login_url='/authentication/login')
@@ -60,7 +69,7 @@ def add_expense(request):
             return render(request, 'expenses/add_expense.html', context)
         description = request.POST['description']
         date = request.POST['expense_date']
-        category = request.POST['category']
+        category_id = request.POST['category']
         account_id = request.POST['account']
 
         if not description:
@@ -68,8 +77,9 @@ def add_expense(request):
             return render(request, 'expenses/add_expense.html', context)
 
         account_instance = Account.objects.get(pk=account_id)
+        category_instance = Category.objects.get(pk=category_id)
         expense = Expense.objects.create(account=account_instance, amount=amount, date=date,
-                               category=category, description=description)
+                               category=category_instance, description=description)
         account_instance.balance -= int(expense.amount)
         account_instance.save()
 
@@ -82,10 +92,12 @@ def add_expense(request):
 def expense_edit(request, id):
     expense = Expense.objects.get(pk=id)
     categories = Category.objects.all()
+    accounts = Account.objects.filter(userId=request.user)
     context = {
         'expense': expense,
         'values': expense,
-        'categories': categories
+        'categories': categories,
+        'accounts': accounts
     }
     if request.method == 'GET':
         return render(request, 'expenses/edit-expense.html', context)
@@ -97,17 +109,21 @@ def expense_edit(request, id):
             return render(request, 'expenses/edit-expense.html', context)
         description = request.POST['description']
         date = request.POST['expense_date']
-        category = request.POST['category']
-
+        category_id = request.POST['category']
+        account_id = request.POST['account']
         if not description:
             messages.error(request, 'description is required')
             return render(request, 'expenses/edit-expense.html', context)
 
-        expense.owner = request.user
+        category_instance = Category.objects.get(pk=category_id)
+        account_instance = Account.objects.get(pk=account_id)
+
+        # Update expense fields
         expense.amount = amount
-        expense. date = date
-        expense.category = category
+        expense.date = date
+        expense.category = category_instance
         expense.description = description
+        expense.account = account_instance
 
         expense.save()
         messages.success(request, 'Expense updated  successfully')
@@ -128,25 +144,12 @@ def expense_category_summary(request):
     accounts = Account.objects.filter(userId=request.user)
     expenses = Expense.objects.filter(account__in=accounts,
                                       date__gte=six_months_ago, date__lte=todays_date)
-    finalrep = {}
 
-    def get_category(expense):
-        return expense.category
-    category_list = list(set(map(get_category, expenses)))
+    category_summary = expenses.values('category__name').annotate(total_amount=Sum('amount'))
 
-    def get_expense_category_amount(category):
-        amount = 0
-        filtered_by_category = expenses.filter(category=category)
-
-        for item in filtered_by_category:
-            amount += item.amount
-        return amount
-
-    for x in expenses:
-        for y in category_list:
-            finalrep[y] = get_expense_category_amount(y)
-
+    finalrep = {entry['category__name']: entry['total_amount'] for entry in category_summary}
     return JsonResponse({'expense_category_data': finalrep}, safe=False)
+    
 
 
 def stats_view(request):

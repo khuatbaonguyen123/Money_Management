@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import Source, Income
+from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -60,7 +61,7 @@ def add_income(request):
             return render(request, 'income/add_income.html', context)
         description = request.POST['description']
         date = request.POST['income_date']
-        source = request.POST['source']
+        source_id = request.POST['source']
         account_id = request.POST['account']
 
         if not description:
@@ -68,14 +69,15 @@ def add_income(request):
             return render(request, 'income/add_income.html', context)
 
         account_instance = Account.objects.get(pk=account_id)
+        source_instance = Source.objects.get(pk=source_id)
         income = Income.objects.create(account=account_instance, amount=amount, date=date,
-                                  source=source, description=description)
+                               source=source_instance, description=description)
         
         # Update the balance of the associated account
         account_instance.balance += int(income.amount)
         account_instance.save()
 
-        messages.success(request, 'Record saved successfully')
+        messages.success(request, 'Income saved successfully')
 
         return redirect('income')
 
@@ -101,21 +103,23 @@ def income_edit(request, id):
             return render(request, 'income/edit_income.html', context)
         description = request.POST['description']
         date = request.POST['income_date']
-        source = request.POST['source']
+        source_id = request.POST['source']
         account_id = request.POST['account']
 
         if not description:
             messages.error(request, 'description is required')
             return render(request, 'income/edit_income.html', context)
         account_instance = Account.objects.get(pk=account_id)
+        source_instance = Source.objects.get(pk=source_id)
+
         income.amount = amount
         income. date = date
-        income.source = source
+        income.source = source_instance
         income.description = description
         income.account = account_instance
 
         income.save()
-        messages.success(request, 'Record updated  successfully')
+        messages.success(request, 'Income updated  successfully')
 
         return redirect('income')
 
@@ -123,34 +127,21 @@ def income_edit(request, id):
 def delete_income(request, id):
     income = Income.objects.get(pk=id)
     income.delete()
-    messages.success(request, 'record removed')
+    messages.success(request, 'Income removed')
     return redirect('income')
 
 def income_source_summary(request):
     todays_date = datetime.date.today()
     six_months_ago = todays_date-datetime.timedelta(days=30*6)
+
     accounts = Account.objects.filter(userId=request.user)
-    
-    finalrep = {}
+    income = Income.objects.filter(account__in=accounts, date__gte=six_months_ago, date__lte=todays_date)
 
-    incomes = Income.objects.filter(account__in=accounts, date__gte=six_months_ago, date__lte=todays_date)
+    source_summary = income.values('source__name').annotate(total_amount=Sum('amount'))
 
-    def get_source(income):
-        return income.source
-    category_list = list(set(map(get_source, incomes)))
+    finalrep = {entry['source__name']: entry['total_amount'] for entry in source_summary}
 
-    def get_income_source_amount(source):
-        amount = 0
-        filtered_by_source = incomes.filter(source=source)
-
-        for item in filtered_by_source:
-            amount += item.amount
-        return amount
-
-    for x in incomes:
-        for y in category_list:
-            finalrep[y] = get_income_source_amount(y)
-
+    # Return the category-wise summary as JSON
     return JsonResponse({'income_source_data': finalrep}, safe=False)
 
 

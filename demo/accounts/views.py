@@ -38,10 +38,10 @@ def add_account(request):
     return render(request, 'account/add_account.html')
 
 def account_edit(request, id):
-    accounts =Account.objects.get(pk=id)
+    account =Account.objects.get(pk=id)
     context = {
-        'values': accounts,
-        'account' : accounts,
+        'values': account,
+        'account' : account,
     }
     if request.method == 'GET':
         return render(request, 'account/edit_account.html', context)
@@ -51,14 +51,22 @@ def account_edit(request, id):
         if not balance:
             messages.error(request, 'Balance is required')
             return render(request, 'account/edit_account.html', context)
+        
         description = request.POST['description']
-        account_name = request.POST['account_name']
 
         if not description:
-            messages.error(request, 'description is required')
+            messages.error(request, 'Description is required')
             return render(request, 'account/edit_account.html', context)
-        messages.success(request, 'Record updated  successfully')
+        
 
+        account_name = request.POST['account_name']
+
+        account.balance = balance
+        account.description = description
+        account.account_name = account_name
+        account.save()
+
+        messages.success(request, 'Account updated  successfully')
         return redirect('account')
     
 def stats_view(request) :

@@ -57,11 +57,8 @@
         <div class="form-group">
           <label for="">Source</label>
           <select class="form-control" name="source">
-            <option selected name="source" value="{{values.source}}"
-              >{{values.source}}</option
-            >
             {% for source in sources%}
-            <option name="source" value="{{source.name}}"
+            <option name="source" value="{{source.id}}"
               >{{source.name}}</option
             >
 

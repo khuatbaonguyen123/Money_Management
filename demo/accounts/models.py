@@ -11,4 +11,7 @@ class Account(models.Model):
     userId = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.accountId} - {self.account_name} - {self.balance} - {self.description} - {self.userId}"
+        return f"{self.account_name} - {self.balance} - {self.description} - {self.userId}"
+    
+    class Meta:
+        ordering = ['-account_name']

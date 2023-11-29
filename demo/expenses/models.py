@@ -16,14 +16,14 @@ class Category(models.Model):
 
 
 class Expense(models.Model):
-    amount = models.FloatField()
+    amount = models.IntegerField()
     date = models.DateField(default=now)
     description = models.TextField()
     account = models.ForeignKey(Account, on_delete=models.CASCADE,default=1)
-    category = models.CharField(max_length=266)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=1)
 
     def __str__(self):
-        return self.category
+        return str(self.category)
 
     class Meta:
-        ordering: ['-date']
+        ordering = ['-date']

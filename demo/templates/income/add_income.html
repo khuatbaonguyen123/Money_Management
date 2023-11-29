@@ -41,10 +41,10 @@
           />
         </div>
         <div class="form-group">
-          <label for="">Sources</label>
+          <label for="">Source</label>
           <select class="form-control" name="source">
             {% for source in sources%}
-            <option name="source" value="{{source.name}}"
+            <option name="source" value="{{source.id}}"
               >{{source.name}}</option
             >
             {% endfor %}
