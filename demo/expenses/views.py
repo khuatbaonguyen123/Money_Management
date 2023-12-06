@@ -27,7 +27,7 @@ def search_expenses(request):
 def index(request):
     accounts = Account.objects.filter(userId=request.user)
     
-    expenses = Expense.objects.filter(account__in=accounts)
+    expenses = Expense.objects.filter(account__in=accounts).order_by('-date')
 
     paginator = Paginator(expenses, 5)
     page_number = request.GET.get('page')
@@ -123,11 +123,22 @@ def delete_expense(request, id):
 
 
 def expense_category_summary(request):
-    todays_date = datetime.date.today()
-    six_months_ago = todays_date-datetime.timedelta(days=30*6)
+    selected_month = request.GET.get('selected_month')
+
+    if selected_month:
+        # Parse the selected month and calculate the date range
+        selected_month_date = datetime.datetime.strptime(selected_month, '%m/%Y').date()
+        start_date = selected_month_date.replace(day=1)
+        end_date = start_date + datetime.timedelta(days=92)
+    else:
+        # If no month is selected, default to the last 6 months
+        todays_date = datetime.date.today()
+        start_date = todays_date - datetime.timedelta(days=30*12)
+        end_date = todays_date
+
     accounts = Account.objects.filter(userId=request.user)
     expenses = Expense.objects.filter(account__in=accounts,
-                                      date__gte=six_months_ago, date__lte=todays_date)
+                                      date__gte=start_date, date__lte=end_date)
     finalrep = {}
 
     def get_category(expense):

@@ -25,7 +25,7 @@ def search_income(request):
 def index(request):
     accounts = Account.objects.filter(userId=request.user)
 
-    income = Income.objects.filter(account__in=accounts)  
+    income = Income.objects.filter(account__in=accounts).order_by('-date')
 
     paginator = Paginator(income, 5)
     page_number = request.GET.get('page')

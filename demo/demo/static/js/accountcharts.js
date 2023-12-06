@@ -10,7 +10,7 @@ const getAccountData = () => {
           Object.values(source_data),
         ];
   
-        renderChart(data, labels);
+        renderChart(data, labels, 'bar');
       });
   };
   
