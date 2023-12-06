@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+
+{% block content %}
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-10">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="">Expenses Summary</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">
+           Summary
+          </li>
+        </ol>
+      </nav>
+    </div>
+
+    <div class="col-md-2">
+      <a href="" class="btn btn-primary">BACK</a>
+    </div>
+
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <button id="yourChangeButton" class="btn btn-primary">Chart</button>
+    </div>
+    <div class="col-md-6">
+        <select id="yourMonthSelect" class="form-control" name="Month">
+          <option value="01/2023">January to March</option>
+          <option value="04/2023">April to June</option>
+          <option value="07/2023">July to September</option>
+          <option value="10/2023">October to December</option>
+          <option value="">All Months</option>
+        </select>
+    </div>
+   </div>
+ <div class="row">
+<div class="col-md-8">
+ <canvas id="myChart" width="400" height="400"></canvas>
+    </div><div class="col-md-4">
+    </div>
+
+ </div>
+</div>
+
+<script src="{% static 'js/statistic.js' %}"></script>
+<script src="{% static 'js/expensecharts.js' %}"></script>
+
+</script>
+
+{% endblock content %}
