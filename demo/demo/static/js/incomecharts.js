@@ -40,4 +40,8 @@ const getIncomeData = (selectedMonth, chartType) => {
           getIncomeData(selectedMonth, chartType);
       }
   });
+
+  const initialSelectedMonth = monthSelect.value;
+  const chartType = chartTypes[currentChartTypeIndex];
+  getIncomeData(initialSelectedMonth,chartType);
 });

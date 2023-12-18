@@ -18,6 +18,7 @@ def search_income(request):
             date__istartswith=search_str, account__in=user_accounts) | Income.objects.filter(
             description__icontains=search_str, account__in=user_accounts) | Income.objects.filter(
             source__icontains=search_str, account__in=user_accounts)
+        
         data = income.values()
         return JsonResponse(list(data), safe=False)
 
@@ -107,7 +108,7 @@ def income_edit(request, id):
             return render(request, 'income/edit_income.html', context)
         account_instance = Account.objects.get(pk=account_id)
         income.amount = amount
-        income. date = date
+        income.date = date
         income.source = source
         income.description = description
         income.account = account_instance

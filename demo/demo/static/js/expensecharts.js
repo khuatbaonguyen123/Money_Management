@@ -38,11 +38,11 @@ document.addEventListener('DOMContentLoaded', function () {
     currentChartTypeIndex = (currentChartTypeIndex + 1) % chartTypes.length;
     const chartType = chartTypes[currentChartTypeIndex];
     if (selectedMonth) {
-        getIncomeData(selectedMonth, chartType);
+      getCategoryData(selectedMonth, chartType);
     }
   });
 
   const initialSelectedMonth = monthSelect.value;
   const chartType = chartTypes[currentChartTypeIndex];
-    getIncomeData(initialSelectedMonth,chartType);
+  getCategoryData(initialSelectedMonth,chartType);
 });

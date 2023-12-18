@@ -57,6 +57,10 @@ def account_edit(request, id):
         if not description:
             messages.error(request, 'description is required')
             return render(request, 'account/edit_account.html', context)
+        accounts.account_name = account_name
+        accounts.balance = balance
+        accounts.description = description
+        accounts.save()
         messages.success(request, 'Record updated  successfully')
 
         return redirect('account')
